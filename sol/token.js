@@ -1,5 +1,13 @@
 pragma solidity ^0.4.11;
 
+/// Checked things
+///    parameter check: zeros
+///    check public functions ACL
+///    check re-calling functions in expected contract status
+///    comprovar els saldos de les funcions
+
+/// #amb: In general is a good idea to 
+/// #amb: Is a common practice class definitions first letter to be uppercase
 contract owned {
     address public owner;
 
@@ -12,6 +20,7 @@ contract owned {
         _;
     }
 
+    /// #amb : use _ prefix for parameters
     function transferOwnership(address newOwner) onlyOwner {
         owner = newOwner;
     }
@@ -25,6 +34,7 @@ contract owned {
 // ERC Token Standard #20 Interface
 // https://github.com/ethereum/EIPs/issues/20
 contract ERC20Interface {
+    // #amb: ERC20Interface.totalSupply() function prototype is commented out
     // Get the total token supply     function totalSupply() constant returns (uint256 totalSupply);
  
     // Get the account balance of another account with address _owner
@@ -51,7 +61,7 @@ contract ERC20Interface {
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 }
 
-
+/// #amb: Is a common practice class definitions first letter to be uppercase
 // Migration Agent interface
 contract migration {
     function migrateFrom(address _from, uint256 _value);
@@ -68,6 +78,7 @@ contract ZeusShieldCoin is owned, ERC20Interface {
     bool public registered = false;
 
     uint256 public totalMigrated = 0;
+    // #amb for addresses are nicer to use 0x0
     address public migrationAgent = 0;
 
     uint256 totalTokens = 0; 
@@ -93,6 +104,8 @@ contract ZeusShieldCoin is owned, ERC20Interface {
     {
     }
 
+    // #amb if you want to not recieve ether, just don't declare the payable
+    //      callback function
     // This unnamed function is called whenever someone tries to send ether to it 
     function () 
     {
@@ -134,6 +147,7 @@ contract ZeusShieldCoin is owned, ERC20Interface {
         }     
     }
  
+    // #amb (_amount <= 0) amount never can be zero
     // Send _value amount of tokens from address _from to address _to
     // The transferFrom method is used for a withdraw workflow, allowing contracts to send
     // tokens on your behalf, for example to "deposit" to a contract address and/or to charge
@@ -161,6 +175,7 @@ contract ZeusShieldCoin is owned, ERC20Interface {
         }
     }
 
+    // #amb use frontrunning attack vector
     // Allow _spender to withdraw from your account, multiple times, up to the _value amount.
     // If this function is called again it overwrites the current allowance with _value.     
     function approve(address _spender, uint256 _amount) 
@@ -178,6 +193,8 @@ contract ZeusShieldCoin is owned, ERC20Interface {
         return allowed[_owner][_spender];
     }
 
+    /// #amb you are not able to change the migration agent, so plan
+    ///      very well migrations (the good part is that you cannot revert it!)
     /// @dev Set address of migration agent contract and enable migration
     /// @param _agent The address of the MigrationAgent contract
     function setMigrationAgent(address _agent) 
@@ -209,6 +226,7 @@ contract ZeusShieldCoin is owned, ERC20Interface {
     }
 
 
+    /// @amb check parameters if are zero
     /// @dev Register for crowdsale and do the token pre-allocation.
     /// @param _tokenFactory The address of ICO-sale contract
     /// @param _congressAddress The address of multisig token contract
@@ -240,6 +258,9 @@ contract ZeusShieldCoin is owned, ERC20Interface {
         }
     }
 
+    /// #amb : - since freeze is public, you are able to freeze any account
+    ///          at any time without account permission
+    ///        - in general use safemath everywhere, you can overflow totalAmount here
     /// @dev Allocate 15% of total supply to ten team members.
     /// @param _account The address of account to be frozen.
     /// @param _totalAmount The amount of tokens to be frozen.
@@ -276,18 +297,21 @@ contract ZeusShieldCoin is owned, ERC20Interface {
         // 91500 * 1000 * 10**18; 100% of locked tokens within 6 months
         // 73200 * 1000 * 10**18;  80% of locked tokens within 12 months
         // 45750 * 1000 * 10**18;  50% of locked tokens within 24 months
-        freeze("0xCDc5BDEFC6Fddc66E73250fCc2F08339e091dDA3", individual);
-        freeze("0x8b47D27b085a661E6306Ac27A932a8c0b1C11b84", individual);
-        freeze("0x825f4977DB4cd48aFa51f8c2c9807Ee89120daB7", individual);
-        freeze("0xcDf5D7049e61b2F50642DF4cb5a005b1b4A5cfc2", individual);
-        freeze("0xab0461FB41326a960d3a2Fe2328DD9A65916181d", individual);
-        freeze("0xd2A131F16e4339B2523ca90431322f559ABC4C3d", individual);
-        freeze("0xCcB4d663E6b05AAda0e373e382628B9214932Fff", individual);
-        freeze("0x60284720542Ff343afCA6a6DBc542901942260f2", individual);
-        freeze("0xcb6d0e199081A489f45c73D1D22F6de58596a99C", individual);
-        freeze("0x928D99333C57D31DB917B4c67D4d8a033F2143A7", individual);
+        // #amb do not use "address" for addresses
+        freeze(0xCDc5BDEFC6Fddc66E73250fCc2F08339e091dDA3, individual);
+        freeze(0x8b47D27b085a661E6306Ac27A932a8c0b1C11b84, individual);
+        freeze(0x825f4977DB4cd48aFa51f8c2c9807Ee89120daB7, individual);
+        freeze(0xcDf5D7049e61b2F50642DF4cb5a005b1b4A5cfc2, individual);
+        freeze(0xab0461FB41326a960d3a2Fe2328DD9A65916181d, individual);
+        freeze(0xd2A131F16e4339B2523ca90431322f559ABC4C3d, individual);
+        freeze(0xCcB4d663E6b05AAda0e373e382628B9214932Fff, individual);
+        freeze(0x60284720542Ff343afCA6a6DBc542901942260f2, individual);
+        freeze(0xcb6d0e199081A489f45c73D1D22F6de58596a99C, individual);
+        freeze(0x928D99333C57D31DB917B4c67D4d8a033F2143A7, individual);
     }
 
+    /// #amb frozenRules could be defined as constant
+    /// #amb unlockat[x] could be defined as constants
     /// @dev Token frozen rules for token holders.
     /// @param _from The token sender.
     /// @param _value The token amount.

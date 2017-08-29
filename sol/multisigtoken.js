@@ -187,6 +187,8 @@ contract MultiSigWallet {
     //    RequirementChange(_required);
     //}
 
+    /// #amb you don't need t add the ownerExists(msg.sender) since
+    ///      confirmTransaction already does it
     /// @dev Allows an owner to submit and confirm a transaction.
     /// @param destination Transaction target address.
     /// @param value Transaction ether value.
@@ -375,6 +377,8 @@ contract MultiSigWallet {
     }
 }
 
+/// #amb     Better to define here that token is an ERC20 instead this definition
+/// #factory usually is a pattern that is used to create things, it's a bad name
 contract token {function transfer(address receiver, uint amount) returns (bool success);}
 
 contract ZSCMultiSigToken is MultiSigWallet {
@@ -387,12 +391,18 @@ contract ZSCMultiSigToken is MultiSigWallet {
         tokenFactory = token(_addressOfTokenFactory);
     }
 
-    // @dev This unnamed function is called whenever someone tries to send ether to it 
+    /// @dev This unnamed function is called whenever someone tries to send ether to it 
+    /// #amb the function definition is payable, so the common way is to 
+    ///      do function() payable { throw } or just not to define the function
     function()
     {
         throw; // Prevents accidental sending of ether
     }
 
+    /// #amb this function overrides the basic multisig functionality
+    ///      to alter the executeTransaction to transferFounds.
+    ///      it's no recommended to execute the mustisig in this way
+    ///      we recommend to use the multisig as is, unmodified
     /// @dev Allows anyone to execute a confirmed transaction.
     /// @param transactionId Transaction ID.
     function executeTransaction(uint transactionId)
