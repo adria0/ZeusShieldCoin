@@ -399,6 +399,11 @@ contract ZSCMultiSigToken is MultiSigWallet {
         throw; // Prevents accidental sending of ether
     }
 
+
+    function transfer(address _receiver, uint _amount) {
+        addTransaction(tokenFactory,0,msg.data)
+    }
+
     /// #amb this function overrides the basic multisig functionality
     ///      to alter the executeTransaction to transferFounds.
     ///      it's no recommended to execute the mustisig in this way
